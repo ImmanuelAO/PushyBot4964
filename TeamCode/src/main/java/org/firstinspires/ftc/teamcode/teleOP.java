@@ -9,10 +9,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 public class teleOP extends OpMode {
 
 
-    public static DcMotor tLeftDT  = null;
-    public static DcMotor bLeftDT  = null;
-    public static DcMotor tRightDT = null;
-    public static DcMotor bRightDT = null;
+    public static DcMotor LeftDT  = null;
+    public static DcMotor RightDT = null;
     public static DcMotor Lift     = null;
     public static DcMotor Claw     = null;
 
@@ -68,85 +66,30 @@ public class teleOP extends OpMode {
 
         //Drive Train Code
         double forward = speedMode * Math.pow(gamepad1.left_stick_y, 3);
-        double right = -speedMode * Math.pow(gamepad1.left_stick_x, 3);
-        double turn = -speedMode * Math.pow(gamepad1.right_stick_x,3);
+        double turn = speedMode * Math.pow(gamepad1.left_stick_x, 3);
 
-        double leftFrontPower = forward + right + turn;
-        double leftBackPower = forward - right + turn;
-        double rightFrontPower = forward - right - turn;
-        double rightBackPower = forward + right - turn;
-        double[] powers = {leftFrontPower, leftBackPower, rightFrontPower, rightBackPower};
+        double leftFrontPower = forward + turn;
+        double rightFrontPower = forward - turn;
+        double[] powers = {leftFrontPower, rightFrontPower};
 
-        boolean needToScale = false;
-        for (double power : powers){
-            if(Math.abs(power) > 1){
-                needToScale = true;
-                break;
-            }
-        }
-        if (needToScale){
-            double greatest = 0;
-            for (double power : powers){
-                if (Math.abs(power) > greatest){
-                    greatest = Math.abs(power);
-                }
-            }
-            leftFrontPower /= greatest;
-            leftBackPower /= greatest;
-            rightFrontPower /= greatest;
-            rightBackPower /= greatest;
-        }
 
-        boolean stop = true;
-        for (double power : powers){
-            if (Math.abs(power) > stopBuffer){
-                stop = false;
-                break;
-            }
-        }
-        if (stop){
-            leftFrontPower = 0;
-            leftBackPower = 0;
-            rightFrontPower = 0;
-            rightBackPower = 0;
-        }
 
-        tLeftDT.setPower(leftFrontPower);
-        bLeftDT.setPower(leftBackPower);
-        tRightDT.setPower(rightFrontPower);
-        bRightDT.setPower(rightBackPower);
+        LeftDT.setPower(leftFrontPower);
+
+        RightDT.setPower(rightFrontPower);
+
         //Drive Train Code
 
 
         //lift code
-        Lift.setPower(4*gamepad2.left_stick_y);
 
 
 
-        //wormhole in
-        if(gamepad2.y){
-            spd += 0.1;
-        }
-        if(gamepad2.a){
-            spd -= 0.1;
-        }
 
-        if (gamepad2.b) {
-            Claw.setPower(spd);
 
-        }else if (gamepad2.x) {
-            Claw.setPower(-spd);
+        telemetry.addLine(" left encoder counts: " + LeftDT.getCurrentPosition());
+        telemetry.addLine(" right encoder counts: " + RightDT.getCurrentPosition());
 
-        }else {
-            Claw.setPower(0);
-
-        }
-        telemetry.addLine("Front left encoder counts: " + tLeftDT.getCurrentPosition());
-        telemetry.addLine("Back left encoder counts: " + bLeftDT.getCurrentPosition());
-        telemetry.addLine("Front right encoder counts: " + tRightDT.getCurrentPosition());
-        telemetry.addLine("Back right encoder counts: " + bRightDT.getCurrentPosition());
-        telemetry.addLine("Lift encoder counts: " + Lift.getCurrentPosition());
-        telemetry.addLine("Claw encoder counts: " + Claw.getCurrentPosition());
 
     }
 }
